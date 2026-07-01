@@ -100,6 +100,203 @@ Error generating stack: `+l.message+`
     			domain: window.location.host
   			}
 			})
-		</script></body>
+		</script>
+<script>
+(function() {
+  var IMAGES = [
+    { src: '/manus-storage/AAA123newFlyer_21824462.jpg', title: 'Dreams Score Analyzer — Front' },
+    { src: '/manus-storage/DBRRD123_4bec01a4.jpg', title: 'R&D Tax Credits — Back' },
+    { src: '/manus-storage/ica3456_bd9603a6.jpg', title: 'FICA Tip Credit — Front' },
+    { src: '/manus-storage/fica5678_6f33c3bd.jpg', title: 'FICA Tip Credit — Back' },
+    { src: '/manus-storage/DBRflyer43_1e373cd1.jpg', title: 'Quantum Health Benefits — Back' },
+    { src: '/manus-storage/BBcards12_0ab2df2f.png', title: 'Bank Breezy — Front' },
+    { src: '/manus-storage/BBcards321_f4894e28.png', title: 'Bank Breezy — Back' },
+    { src: '/manus-storage/bcards1-1536x881_9de156b6.png', title: 'Business Card Sample — Front' },
+    { src: '/manus-storage/Bcards2-1536x881_4a0656c9.png', title: 'Business Card Sample — Back' }
+  ];
+
+  var current = 0;
+  var timer = null;
+  var injected = false;
+
+  function buildCarousel() {
+    var wrap = document.createElement('div');
+    wrap.id = 'dbr-hero-carousel';
+    wrap.style.cssText = [
+      'position:absolute',
+      'right:0',
+      'top:50%',
+      'transform:translateY(-50%)',
+      'width:280px',
+      'display:flex',
+      'flex-direction:column',
+      'align-items:center',
+      'gap:0.75rem',
+      'z-index:10'
+    ].join(';');
+
+    // Card frame
+    var frame = document.createElement('div');
+    frame.style.cssText = [
+      'width:280px',
+      'height:175px',
+      'border-radius:10px',
+      'overflow:hidden',
+      'border:1.5px solid rgba(0,229,200,0.45)',
+      'box-shadow:0 0 28px rgba(0,229,200,0.18), 0 8px 32px rgba(0,0,0,0.55)',
+      'background:#0d1f35',
+      'position:relative'
+    ].join(';');
+
+    // Image element
+    var img = document.createElement('img');
+    img.src = IMAGES[0].src;
+    img.alt = IMAGES[0].title;
+    img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;transition:opacity 0.4s ease';
+    frame.appendChild(img);
+
+    // Caption
+    var caption = document.createElement('div');
+    caption.style.cssText = [
+      'font-family:'Bebas Neue',sans-serif',
+      'font-size:0.65rem',
+      'letter-spacing:0.12em',
+      'color:#7aa8b8',
+      'text-align:center',
+      'text-transform:uppercase',
+      'min-height:1rem'
+    ].join(';');
+    caption.textContent = IMAGES[0].title;
+
+    // Dots container
+    var dots = document.createElement('div');
+    dots.style.cssText = 'display:flex;gap:5px;align-items:center;justify-content:center';
+
+    function updateDots() {
+      dots.innerHTML = '';
+      IMAGES.forEach(function(_, i) {
+        var d = document.createElement('div');
+        d.style.cssText = [
+          'width:' + (i === current ? '18px' : '6px'),
+          'height:6px',
+          'border-radius:3px',
+          'background:' + (i === current ? '#00e5c8' : 'rgba(0,229,200,0.25)'),
+          'transition:all 0.3s ease',
+          'cursor:pointer'
+        ].join(';');
+        d.addEventListener('click', function() { goTo(i); });
+        dots.appendChild(d);
+      });
+    }
+
+    // Prev/Next arrows
+    var arrowStyle = [
+      'position:absolute',
+      'top:50%',
+      'transform:translateY(-50%)',
+      'background:rgba(5,13,24,0.7)',
+      'border:1px solid rgba(0,229,200,0.3)',
+      'color:#00e5c8',
+      'width:26px',
+      'height:26px',
+      'border-radius:50%',
+      'display:flex',
+      'align-items:center',
+      'justify-content:center',
+      'cursor:pointer',
+      'font-size:0.8rem',
+      'line-height:1',
+      'z-index:2',
+      'transition:background 0.2s'
+    ].join(';');
+
+    var prev = document.createElement('div');
+    prev.style.cssText = arrowStyle + ';left:6px';
+    prev.innerHTML = '&#8249;';
+    prev.addEventListener('click', function() { goTo((current - 1 + IMAGES.length) % IMAGES.length); });
+
+    var next = document.createElement('div');
+    next.style.cssText = arrowStyle + ';right:6px';
+    next.innerHTML = '&#8250;';
+    next.addEventListener('click', function() { goTo((current + 1) % IMAGES.length); });
+
+    frame.appendChild(prev);
+    frame.appendChild(next);
+
+    function goTo(idx) {
+      img.style.opacity = '0';
+      setTimeout(function() {
+        current = idx;
+        img.src = IMAGES[current].src;
+        img.alt = IMAGES[current].title;
+        caption.textContent = IMAGES[current].title;
+        img.style.opacity = '1';
+        updateDots();
+      }, 200);
+      clearInterval(timer);
+      timer = setInterval(function() { goTo((current + 1) % IMAGES.length); }, 3500);
+    }
+
+    updateDots();
+    timer = setInterval(function() { goTo((current + 1) % IMAGES.length); }, 3500);
+
+    wrap.appendChild(frame);
+    wrap.appendChild(caption);
+    wrap.appendChild(dots);
+
+    return wrap;
+  }
+
+  function tryInject() {
+    if (injected) return;
+    // Find the hero section - it has position:relative and overflow:hidden
+    // The inner container has maxWidth:960px and padding:5rem 1.5rem 4rem
+    var sections = document.querySelectorAll('section');
+    for (var i = 0; i < sections.length; i++) {
+      var sec = sections[i];
+      var style = sec.style;
+      if (style.overflow === 'hidden' && style.position === 'relative') {
+        // Find the inner container div with maxWidth 960px
+        var containers = sec.querySelectorAll('div');
+        for (var j = 0; j < containers.length; j++) {
+          var c = containers[j];
+          if (c.style.maxWidth === '960px' && c.style.position === 'relative') {
+            // Found the hero container - make it relative and inject carousel
+            c.style.position = 'relative';
+            // Check if hero text content is present (ORDER YOUR)
+            if (c.textContent && c.textContent.indexOf('ORDER YOUR') !== -1) {
+              // Adjust padding to make room for carousel on right
+              c.style.paddingRight = '320px';
+              var carousel = buildCarousel();
+              c.appendChild(carousel);
+              injected = true;
+
+              // Add responsive style to hide on small screens
+              var style = document.createElement('style');
+              style.textContent = '@media (max-width: 900px) { #dbr-hero-carousel { display: none !important; } .dbr-hero-padded { padding-right: 1.5rem !important; } }';
+              document.head.appendChild(style);
+              return true;
+            }
+          }
+        }
+      }
+    }
+    return false;
+  }
+
+  // Try immediately, then use MutationObserver as fallback
+  if (!tryInject()) {
+    var obs = new MutationObserver(function() {
+      if (tryInject()) {
+        obs.disconnect();
+      }
+    });
+    obs.observe(document.body, { childList: true, subtree: true });
+    // Fallback timeout
+    setTimeout(function() { obs.disconnect(); }, 10000);
+  }
+})();
+</script>
+</body>
 
 </html>
