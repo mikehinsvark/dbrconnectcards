@@ -103,6 +103,8 @@ Error generating stack: `+l.message+`
 		</script>
 
 
+
+
 <script id="dbr-carousel-script">
 (function() {
   var IMAGES = [
@@ -124,23 +126,54 @@ Error generating stack: `+l.message+`
   function buildCarousel() {
     var wrap = document.createElement('div');
     wrap.id = 'dbr-hero-carousel';
-    wrap.style.cssText = 'position:absolute;right:0;top:50%;transform:translateY(-50%);width:290px;display:flex;flex-direction:column;align-items:center;gap:10px;z-index:10';
+    wrap.style.cssText = 'position:absolute;right:0;top:50%;transform:translateY(-50%);width:270px;display:flex;flex-direction:column;align-items:center;gap:10px;z-index:10';
 
+    /* Card frame - tall enough for 5x7 portrait cards */
     var frame = document.createElement('div');
-    frame.style.cssText = 'width:290px;height:182px;border-radius:10px;overflow:hidden;border:1.5px solid rgba(0,229,200,0.5);box-shadow:0 0 30px rgba(0,229,200,0.2),0 8px 32px rgba(0,0,0,0.6);background:#0d1f35;position:relative;cursor:pointer';
+    frame.style.cssText = [
+      'width:270px',
+      'height:350px',
+      'border-radius:10px',
+      'overflow:hidden',
+      'border:1.5px solid rgba(0,229,200,0.5)',
+      'box-shadow:0 0 30px rgba(0,229,200,0.2),0 8px 32px rgba(0,0,0,0.6)',
+      'background:#0d1f35',
+      'position:relative',
+      'cursor:pointer'
+    ].join(';');
 
     var img = document.createElement('img');
     img.src = IMAGES[0].src;
     img.alt = IMAGES[0].title;
-    img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;transition:opacity 0.35s ease';
+    img.style.cssText = 'width:100%;height:100%;object-fit:contain;display:block;transition:opacity 0.35s ease;background:#0d1f35';
     frame.appendChild(img);
 
     function makeArrow(html, side) {
       var a = document.createElement('div');
       a.innerHTML = html;
-      a.style.cssText = 'position:absolute;top:50%;transform:translateY(-50%);' + side + ':8px;background:rgba(5,13,24,0.75);border:1px solid rgba(0,229,200,0.4);color:#00e5c8;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1.1rem;line-height:1;z-index:3;transition:background 0.2s;user-select:none';
+      a.style.cssText = [
+        'position:absolute',
+        'top:50%',
+        'transform:translateY(-50%)',
+        side + ':8px',
+        'background:rgba(5,13,24,0.75)',
+        'border:1px solid rgba(0,229,200,0.4)',
+        'color:#00e5c8',
+        'width:28px',
+        'height:28px',
+        'border-radius:50%',
+        'display:flex',
+        'align-items:center',
+        'justify-content:center',
+        'cursor:pointer',
+        'font-size:1.1rem',
+        'line-height:1',
+        'z-index:3',
+        'transition:background 0.2s',
+        'user-select:none'
+      ].join(';');
       a.onmouseover = function(){ this.style.background='rgba(0,229,200,0.15)'; };
-      a.onmouseout = function(){ this.style.background='rgba(5,13,24,0.75)'; };
+      a.onmouseout  = function(){ this.style.background='rgba(5,13,24,0.75)'; };
       return a;
     }
 
@@ -194,13 +227,10 @@ Error generating stack: `+l.message+`
 
   function tryInject() {
     if (injected) return false;
-    // Find ALL sections on the page
     var sections = document.querySelectorAll('section');
     for (var i = 0; i < sections.length; i++) {
       var sec = sections[i];
-      // Check if this section contains "ORDER YOUR" text (the hero)
       if (sec.textContent && sec.textContent.indexOf('ORDER YOUR') !== -1 && sec.textContent.indexOf('DBR CARDS') !== -1) {
-        // Find the inner container - look for a div with maxWidth 960px
         var allDivs = sec.querySelectorAll('div');
         var heroContainer = null;
         for (var j = 0; j < allDivs.length; j++) {
@@ -211,23 +241,16 @@ Error generating stack: `+l.message+`
             break;
           }
         }
-        if (!heroContainer) {
-          // Fallback: use the section itself and make it relative
-          heroContainer = sec;
-        }
-        // Make sure container is positioned relatively
+        if (!heroContainer) { heroContainer = sec; }
         if (window.getComputedStyle(heroContainer).position !== 'relative') {
           heroContainer.style.position = 'relative';
         }
-        // Add right padding to make room for carousel
-        heroContainer.style.paddingRight = '320px';
-        // Inject carousel
+        heroContainer.style.paddingRight = '300px';
         var carousel = buildCarousel();
         heroContainer.appendChild(carousel);
         injected = true;
-        // Add responsive style
         var styleEl = document.createElement('style');
-        styleEl.textContent = '@media(max-width:900px){#dbr-hero-carousel{display:none!important}[data-hero-padded]{padding-right:1.5rem!important}}';
+        styleEl.textContent = '@media(max-width:900px){#dbr-hero-carousel{display:none!important}}';
         document.head.appendChild(styleEl);
         return true;
       }
@@ -235,15 +258,12 @@ Error generating stack: `+l.message+`
     return false;
   }
 
-  // Try after DOM is ready
   function init() {
     if (!tryInject()) {
       var attempts = 0;
       var interval = setInterval(function() {
         attempts++;
-        if (tryInject() || attempts > 50) {
-          clearInterval(interval);
-        }
+        if (tryInject() || attempts > 50) { clearInterval(interval); }
       }, 200);
     }
   }
